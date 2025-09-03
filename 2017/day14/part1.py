@@ -1,8 +1,16 @@
-num_list = [i for i in range(256)]
+def part1():
+    input = open('input.txt', 'r').readline()
 
-input_twists = "31,2,85,1,80,109,35,63,98,255,0,13,105,254,128,33"
+    used_space = 0
+    for i in range(128):
+        row_hash = hash_string(f"{input}-{i}")
+        for char in row_hash:
+            binary_hash = str(bin(int(char, 16))[2:])
+            for char in binary_hash:
+                if char != "0":
+                    used_space += 1
+    print(used_space)
 
-# From day 14
 def hash_string(string):
     num_list = [i for i in range(256)]
     twists = []
@@ -48,5 +56,6 @@ def perform_twists(num_list, twists, current_position, skip_length):
         skip_length += 1
 
     return (current_position, skip_length)
+  
 
-hash_string(input_twists)
+part1()
