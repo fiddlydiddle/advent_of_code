@@ -52,23 +52,38 @@ firewall_map = """0: 3
 from collections import defaultdict
 from math import gcd
 
-# d is {depth:range}, eg:
+# Parse firewall data: d is {depth: range}
 d = eval("{"+firewall_map.strip().replace('\n',',')+"}")
 
-neq = defaultdict(list) # of the form {b:[a1,a2...]} where delay != a_i (mod b)
+# Build constraints: neq[period] contains forbidden residues (mod period)
+# For each scanner at depth with range r, it has period = 2*(r-1)
+# We need delay != -depth (mod period) to avoid being caught
+forbidden_residues = defaultdict(list)
 for depth in d.keys():
-	neq[d[depth]*2-2] +=  [(-depth)%(d[depth]*2-2)]
-moduli = sorted(neq.keys())
+	period = 2 * (d[depth] - 1)	
+	forbidden_residues[period].append((-depth)%(period))
+moduli = sorted(forbidden_residues.keys())
 
-prev_lcm=1
+# Use Chinese Remainder Theorem to find valid delays
+prev_lcm = 1
 lcm = 1
-residues = [0] #mod 1
-for m in moduli:
-	g = gcd(m,lcm) # simple Euclidean algorithm
+possible_delays = [0]  # Start with residue 0 (mod 1)
+for modulus in moduli:
+	g = gcd(modulus, lcm)  # Greatest common divisor
 	prev_lcm = lcm
-	lcm = lcm*m//g  #new modulus
-	residues = [x for x in
-		sum([list(range(int(i),int(lcm),int(prev_lcm))) for i in residues],[])
-		if x%m not in neq[m]]
+	lcm = lcm * modulus // g  # New LCM (least common multiple)
+	
+	# Extend previous residues to new modulus
+	extended_delays = []
+	for delay in possible_delays:
+		for i in range(int(delay), int(lcm), int(prev_lcm)):
+			extended_delays.append(i)
+	
+	# Filter out residues that violate current constraints
+	valid_delays = []
+	for delay in extended_delays:
+		if delay % modulus not in forbidden_residues[modulus]:
+			valid_delays.append(delay)
+	possible_delays = valid_delays
 
-print(sorted(residues)[0], "(mod",lcm,")") # the smallest residue
+print(sorted(possible_delays)[0], "(mod", lcm, ")")  # Smallest valid delay

@@ -7,7 +7,8 @@ from collections import deque
 def part2():
     input = open('input.txt', 'r').readline()
 
-    # Hash rows, convert to binary, and keep track of occupied nodes
+    # Part 1
+    # Hash rows, convert to binary, build graph, and keep track of occupied nodes
     occupied_nodes = deque()
     for row_idx in range(128):
         row_hash = hash_string(f"{input}-{row_idx}")
@@ -16,10 +17,10 @@ def part2():
             if char != "0":
                 occupied_nodes.append((row_idx, col_idx))
 
-    # Part 1 answer          
+            
     print(len(occupied_nodes))
 
-    # enumerate subgraphs
+    # Part 2: enumerate subgraphs
     num_subgraphs = 0
     while occupied_nodes:
         # Pop an unseen_node (a new subgraph member)
