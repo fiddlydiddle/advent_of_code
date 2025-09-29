@@ -1,0 +1,3 @@
+# For excluding Rust project dependency artifacts
+**/target/
+**/Cargo.lock
