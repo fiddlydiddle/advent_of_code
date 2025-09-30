@@ -57,72 +57,10 @@ async fn main() {
         .expect("Something went wrong reading the file");
     let instructions = parse_input(&input);
     
-    // Run part 1 first
-    part1(instructions.clone()).await;
-    
-    // Then run part 2
-    let result = part2(instructions).await;
+    let result = part2(instructions).await; // Correct answer: 6858
     println!("Part 2: {}", result);
 }
 
-async fn part1(instructions: Vec<Instruction>) {
-    let mut program = Program::new(0);
-    let mut idx: i64 = 0;
-    let mut most_recent_sound: i64 = 0;
-
-    while idx >= 0 && idx < instructions.len().try_into().unwrap() {
-        let instruction = instructions[idx as usize].clone();
-        if !program.registers.contains_key(instruction.register.as_str()) {
-            program.registers.insert(instruction.register.clone(), 0);
-        }
-
-        match instruction.operation.as_str() {
-            "snd" => {
-                let register_value = program.get_value(Some(instruction.register.clone()));
-                most_recent_sound = register_value;
-            },
-            "set" => {
-                let new_value = program.get_value(instruction.parameter);
-                program.registers.insert(instruction.register, new_value);
-            },
-            "add" => {
-                let existing_value = program.get_value(Some(instruction.register.clone()));
-                let operation_value = program.get_value(instruction.parameter);
-                program.registers.insert(instruction.register, existing_value + operation_value);
-            },
-            "mul" => {
-                let existing_value = program.get_value(Some(instruction.register.clone()));
-                let operation_value = program.get_value(instruction.parameter);
-                program.registers.insert(instruction.register, existing_value * operation_value);
-            },
-            "mod" => {
-                let existing_value = program.get_value(Some(instruction.register.clone()));
-                let operation_value = program.get_value(instruction.parameter);
-                if operation_value > 0 {
-                    program.registers.insert(instruction.register, existing_value % operation_value);
-                }
-            },
-            "rcv" => {
-                if program.get_value(Some(instruction.register.clone())) != 0 {
-                    println!("Part 1: {}", most_recent_sound);
-                    return;
-                }
-            },
-            "jgz" => {
-                let value = program.get_value(instruction.parameter);
-                if program.get_value(Some(instruction.register.clone())) > 0 {
-                    idx = idx + value;
-                    continue;
-                }
-            },
-            _ => {
-                panic!("Unknown instruction operation: {}", instruction.operation);
-            }
-        }
-
-        idx += 1;
-    }
-}
 
 async fn part2(instructions: Vec<Instruction>) -> i64 {
     let program0 = Arc::new(Mutex::new(Program::new(0)));
@@ -159,7 +97,6 @@ async fn run_programs(
         )
     );
 
-    let mut deadlock_count = 0;
     loop {
         time::sleep(Duration::from_millis(1)).await;
 
@@ -170,15 +107,8 @@ async fn run_programs(
             && (program1_guard.is_receiving && program1_guard.queue.is_empty());
 
         if deadlock {
-            deadlock_count += 1;
-
-            if deadlock_count >= 100 {
-                *is_canceled.lock().await = true;
-                break;
-            }
-        }
-        else {
-            deadlock_count = 0;
+            *is_canceled.lock().await = true;
+            break;
         }
     }
 
@@ -195,23 +125,16 @@ async fn run_program(
 ) -> Result<(), tokio::task::JoinError> {
 
     let mut idx: i64 = 0;
-    let mut iteration: i64 = 0;
     let mut most_recent_sound: i64 = 0;
     let mut part1_result: i64 = 0;
 
     while idx >= 0 && idx < instructions.len().try_into().unwrap() {
-        // Periodically check if parent wants to cancel process
-        if iteration % 100 == 0 {
-            if *is_canceled.lock().await { 
-                return Ok(()); 
-            }
-        }
 
         let instruction = instructions[idx as usize].clone();
         
-        // Get a lock on our program
         let mut program_guard = program.lock().await;
         
+        // Initialize register if its not there yet
         if !program_guard.registers.contains_key(instruction.register.as_str()) {
             program_guard.registers.insert(instruction.register.clone(), 0);
         }
@@ -219,17 +142,15 @@ async fn run_program(
         match instruction.operation.as_str() {
             "snd" => {
                 let register_value = program_guard.get_value(Some(instruction.register.clone()));
+                // Part 1: keep tabs of most recent sound played
                 most_recent_sound = register_value;
+                // Part 2: put message on other program's queue
                 program_guard.messages_sent += 1;
-                // Release our lock before sending to other program
                 drop(program_guard);
-                // Send message to other program
                 {
                     let mut other_program_guard = other_program.lock().await;
                     other_program_guard.queue.push_back(register_value);
                 }
-                // Re-acquire our lock
-                program_guard = program.lock().await;
             },
             "set" => {
                 let new_value = program_guard.get_value(instruction.parameter);
@@ -253,19 +174,30 @@ async fn run_program(
                 }
             },
             "rcv" => {
+                program_guard.is_receiving = true;
+
+                // Part 1: Print most recently played sound on first "recover" command
                 if program_guard.get_value(Some(instruction.register.clone())) != 0 && part1_result == 0 && program_guard.program_id == 0 {
                     part1_result = most_recent_sound;
                     println!("Part 1: {}", part1_result);
                 }
 
-                // Try to receive a message
-                if program_guard.queue.len() > 0 {
-                    let new_value: i64 = program_guard.queue.pop_front()
-                        .expect("Queue was unexpectedly empty after length check");
-                    program_guard.registers.insert(instruction.register.clone(), new_value);
-                } else {
-                    // No message available, set receiving flag and wait
-                    program_guard.is_receiving = true;
+                // Part 2: Consume message from queue. If queue is empty, wait for new message.
+                while program_guard.is_receiving {
+                    if program_guard.queue.len() > 0 {
+                        let new_value: i64 = program_guard.queue.pop_front()
+                            .expect("Queue was unexpectedly empty after length check");
+                        program_guard.registers.insert(instruction.register.clone(), new_value);
+                        program_guard.is_receiving = false;
+                    } else {
+                        // Queue is empty, check if we're in a deadlocked state
+                        drop(program_guard);
+                        if *is_canceled.lock().await {
+                            return Ok(());
+                        }
+                        time::sleep(Duration::from_millis(1)).await;
+                        program_guard = program.lock().await;
+                    }
                 }
             },
             "jgz" => {
@@ -281,12 +213,8 @@ async fn run_program(
         }
 
         idx += 1;
-        iteration += 1;
     }
 
-    // Program has reached the end of instructions
-    let final_program_guard = program.lock().await;
-    println!("Program {} done", final_program_guard.program_id);
     Ok(())
 }
 

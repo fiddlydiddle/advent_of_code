@@ -54,7 +54,6 @@ async def run_programs(instructions: list[Instruction], program_0: Program, prog
     program0_execution = asyncio.create_task(run_program(program_0, instructions, program_1))
     program1_execution = asyncio.create_task(run_program(program_1, instructions, program_0))
 
-    deadlock_counter = 0
     while True:
         await asyncio.sleep(0.001)
 
@@ -62,14 +61,9 @@ async def run_programs(instructions: list[Instruction], program_0: Program, prog
                    (program_1.is_receiving and not program_1.queue)
         
         if deadlock:
-            deadlock_counter += 1 
-            
-            if deadlock_counter >= 50: 
-                program0_execution.cancel()
-                program1_execution.cancel()
-                break
-        else:
-            deadlock_counter = 0 
+            program0_execution.cancel()
+            program1_execution.cancel()
+            break
 
     await asyncio.gather(program0_execution, program1_execution, return_exceptions=True)
     return program_1.messages_sent
