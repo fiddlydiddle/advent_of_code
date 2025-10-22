@@ -30,6 +30,7 @@ def part2(input_path):
     for row_idx, row in enumerate(input):
         row = row.rstrip()
         for col_idx in range(num_rows):
+            # Check if we've seen this node yet. If not, traverse its whole subgraph
             if (row_idx, col_idx) not in seen:
                 (perimeter_cost, side_cost) = traverse_subgraph(input, row_idx, num_rows, col_idx, num_cols, seen)
                 total_perimeter_cost += perimeter_cost
@@ -101,7 +102,7 @@ def traverse_subgraph(input, row_idx, num_rows, col_idx, num_cols, seen):
 
         # look for "outside" corners
         #    _
-        #   | 
+        #   | |
         #
         if (not up and not left):
             subgraph_corners += 1
@@ -113,9 +114,9 @@ def traverse_subgraph(input, row_idx, num_rows, col_idx, num_cols, seen):
             subgraph_corners += 1
 
         # look for "inside" corners
-        #
+        #     _
         #      |_
-        #       
+        #        |
         if (up and left) and not input[row_idx - 1][col_idx - 1] == this_plot_letter:
             subgraph_corners += 1
         if (up and right) and not input[row_idx - 1][col_idx + 1] == this_plot_letter:
@@ -131,17 +132,4 @@ def traverse_subgraph(input, row_idx, num_rows, col_idx, num_cols, seen):
     side_cost = subgraph_area * subgraph_corners
     return (perimeter_cost, side_cost)
             
-
-
-            
-def get_plot_data(plot_data, total_cost):
-    num_regions = len(plot_data.keys())
-    total_area = 0
-    for plot_key in plot_data.keys():
-        (plot_area, plot_perimeter) = plot_data[plot_key]
-        total_area += plot_area
-        total_cost += plot_area * plot_perimeter
-
-    return (num_regions, total_area, total_cost)
-
 main()
