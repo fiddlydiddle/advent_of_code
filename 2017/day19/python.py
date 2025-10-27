@@ -8,7 +8,6 @@ def main():
     part1_result = []
     part2_result = 0
 
-
     # find first pipe
     current_column = input[0].find('|')
 
