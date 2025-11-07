@@ -14,7 +14,7 @@ def main():
 def part1(input):
     result = 0
 
-    # Go through line in input and check if operations
+    # Go through each line in input and check if operations
     # can be applied to operands to get target value
     for line in input:
         line = line.strip()
@@ -30,7 +30,7 @@ def part1(input):
             for running_total in running_totals:
                 new_addition = operand + running_total
                 new_multiplication = operand * running_total
-                new_concatenation = int(str(running_total) + str(operand))
+                new_concatenation = int(str(running_total) + str(operand)) # Part 2
                 if (new_addition == target_value or new_multiplication == target_value or new_concatenation == target_value) and idx == len(operands) - 1:
                     result += target_value
                     found_target = True
@@ -40,6 +40,7 @@ def part1(input):
                     new_totals.append(new_addition)
                 if new_multiplication <= target_value:
                     new_totals.append(new_multiplication)
+                # Part 2
                 if new_concatenation <= target_value:
                     new_totals.append(new_concatenation)
 
