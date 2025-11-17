@@ -13,7 +13,7 @@ def main():
     print(f"Part 1: {len(part1_antipoles.keys())}")
     part2_antipoles = part1(input, 200)
     print(f"Part 2: {len(part2_antipoles.keys())}")
-    
+
 
 def part1(input, num_repititions = 0):
     height = len(input)
@@ -41,7 +41,9 @@ def part1(input, num_repititions = 0):
                 row_diff = antenna2_row - antenna1_row
                 col_diff = antenna2_col - antenna1_col
 
-                # Two antennas will create two antipoles, one on each side
+                # Antennas will create evenly spaced antipoles on each side
+                # For part one, we only want the first antipole on each side
+                # For part two, we want all in-bounds antipoles on each side
                 frequency_antipoles = []
                 iteration_range = [1] if not num_repititions else range(num_repititions)
                 for i in iteration_range:

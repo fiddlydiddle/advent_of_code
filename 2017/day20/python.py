@@ -20,7 +20,7 @@ def main():
 def part1(particles):
     # Run several iterations of particle movement
     # See if patterns emerge about closest particle
-    for i in range(10000):
+    for i in range(200):
         closest_distance = math.inf
         closest_particle = None
         # Part 2: Keep track of occupied positions for collision detection
@@ -37,6 +37,7 @@ def part1(particles):
                 # Collision
                 particle.has_collided = True
                 unique_positions[str(particle.position)].has_collided = True
+                print(f"Collion! Tick: {i}")
 
 
             (position_x, position_y, position_z) = particle.position
@@ -48,7 +49,7 @@ def part1(particles):
         # Part 2: filter out particles that collided
         particles = list(filter(lambda particle: particle.has_collided == False, particles))
         # Part 1: Closest particle
-        print(f"Closest particle: {closest_particle.idx}, Distance: {closest_distance}")
+        # print(f"Closest particle: {closest_particle.idx}, Distance: {closest_distance}")
 
     return particles
 

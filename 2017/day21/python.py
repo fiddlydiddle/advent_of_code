@@ -2,22 +2,25 @@
 def main():
     starting_shape = ['.#.','..#','###']
 
+    # Part 1 example
     example_input = open('/home/john/Documents/Projects/advent_of_code/2017/day21/example.txt', 'r').readlines()
     example_pattern_rules = parse_input_rules(example_input)
     part1_example_result = part1(starting_shape, example_pattern_rules, 2)
     print(f"Part 1 (example): {to_pattern_string(part1_example_result).count('#')}")
 
+    # Part 1
     part1_input = open('/home/john/Documents/Projects/advent_of_code/2017/day21/input.txt', 'r').readlines()
     part1_pattern_rules = parse_input_rules(part1_input)
     part1_result = part1(starting_shape, part1_pattern_rules, 5)
     print(f"Part 1: {to_pattern_string(part1_result).count('#')}")
 
+    # Part 2
     part2_result = part1(starting_shape, part1_pattern_rules, 18)
     print(f"Part 2: {to_pattern_string(part2_result).count('#')}")
 
 def part1(starting_shape, pattern_rules, num_iterations):
     result_shape = starting_shape
-    for i in range(num_iterations):
+    for _ in range(num_iterations):
         size = len(result_shape)
 
         # Split even-number size grid into many 2x2 grids
@@ -76,6 +79,7 @@ def part1(starting_shape, pattern_rules, num_iterations):
 def apply_rule(piece, pattern_rules):
     new_piece = None
     num_rotations = 0
+    # Flip and rotate piece until it matches a rule
     while not new_piece and num_rotations < 4:
         if to_pattern_string(piece) in pattern_rules:
             new_piece = pattern_rules[to_pattern_string(piece)]
@@ -93,6 +97,7 @@ def apply_rule(piece, pattern_rules):
     return new_piece
 
 def rotate_piece(piece):
+    # Transpose then flip the piece
     return [''.join(column) for column in zip(*piece)][::-1]
     
 def flip_piece(piece):
