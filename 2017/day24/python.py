@@ -1,19 +1,32 @@
 def part1(input):
-    best_strength = 0
+    part1_best_strength = 0
+    part2_best_strength = 0
+    part2_best_length = 0
 
     # Try all combos and keep running tally of best strength
     def dfs(port_size, current_strength, visited_indices):
-        nonlocal best_strength
+        nonlocal part1_best_strength
+        nonlocal part2_best_strength
+        nonlocal part2_best_length
 
-        if current_strength > best_strength:
-            best_strength = current_strength
+        # part 1 max check
+        if current_strength > part1_best_strength:
+            part1_best_strength = current_strength
 
+        # part 2 max check
+        if len(visited_indices) >= part2_best_length and current_strength > part2_best_strength:
+            part2_best_length = len(visited_indices)
+            part2_best_strength = current_strength
+
+        # Try adding all other pieces to current bridge
         for idx, piece in enumerate(input):
+            # Check if we've already used this piece in the bridge
             if idx in visited_indices:
                 continue
 
             piece_ports = [int(x) for x in piece.split('/')]
 
+            # Check if piece matches the port we currently need
             if port_size in piece_ports:
                 piece_strength = piece_ports[0] + piece_ports[1]
                 next_port_size = piece_ports[1] if piece_ports[0] == port_size else piece_ports[0]
@@ -27,7 +40,9 @@ def part1(input):
 
     dfs(0, 0, set())
 
-    return best_strength
+    print(f"Part 1: {part1_best_strength}, Part 2 (strength): {part2_best_strength}, Part 2 (length): {part2_best_length}")
+
+    return part1_best_strength
 
 def part2(input):
     best_strength = 0
@@ -61,29 +76,28 @@ def part2(input):
 
     dfs(0, 0, set())
 
-    print(longest_bridge)
     return best_strength
 
 
 def main():
-    # Part 1 Example
-    input = open('/home/john/Documents/Projects/advent_of_code/2017/day24/example.txt', 'r').read().strip().split('\n')
-    result = part1(input)
-    print(f"Part 1 (example): {result}")
+    # # Part 1 Example
+    # input = open('/home/john/Documents/Projects/advent_of_code/2017/day24/example.txt', 'r').read().strip().split('\n')
+    # result = part1(input)
+    # print(f"Part 1 (example): {result}")
 
     # Part 1
     input = open('/home/john/Documents/Projects/advent_of_code/2017/day24/input.txt', 'r').read().strip().split('\n')
     result = part1(input)
     print(f"Part 1: {result}")
 
-    # Part 2 Example
-    input = open('/home/john/Documents/Projects/advent_of_code/2017/day24/example.txt', 'r').read().strip().split('\n')
-    result = part2(input)
-    print(f"Part 2 (example): {result}")
+    # # Part 2 Example
+    # input = open('/home/john/Documents/Projects/advent_of_code/2017/day24/example.txt', 'r').read().strip().split('\n')
+    # result = part2(input)
+    # print(f"Part 2 (example): {result}")
 
     # Part 2
-    input = open('/home/john/Documents/Projects/advent_of_code/2017/day24/input.txt', 'r').read().strip().split('\n')
-    result = part2(input)
-    print(f"Part 2: {result}")
+    # input = open('/home/john/Documents/Projects/advent_of_code/2017/day24/input.txt', 'r').read().strip().split('\n')
+    # result = part2(input)
+    # print(f"Part 2: {result}")
 
 main()
