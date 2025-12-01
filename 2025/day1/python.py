@@ -1,3 +1,5 @@
+import math
+
 def part1(input):
     current_val = 50
     result = 0
@@ -43,6 +45,37 @@ def part2(input):
 
     return result
 
+def part2_2(input):
+    current_val = 50
+    result = 0
+
+    for line in input:
+        direction = line[0]
+        sign = 1 if direction == 'R' else -1
+        steps = int(line[1:])
+        
+        change = steps * sign
+        
+        old_position = current_val
+        new_position = old_position + change
+        
+        if change > 0:
+            # Take floor of new_position divided by 100. Same for old_position.
+            # Num zeroes is the difference between the two.
+            old_loops = old_position // 100
+            new_loops = new_position // 100
+            result += (new_loops - old_loops)
+        elif change <= 0:
+            # Take ceiling of new_position divided by 100. Same for old_position
+            # Num zeros is the defference between the two.
+            old_loops = math.ceil(old_position / 100.0) - 1
+            new_loops = math.ceil(new_position / 100.0) - 1
+            result += (old_loops - new_loops)
+
+        current_val = new_position % 100
+        
+    return result
+
 
 def main():
     example_input = open('/home/john/Documents/Projects/advent_of_code/2025/day1/example.txt', 'r').read().strip().split('\n')
@@ -63,5 +96,9 @@ def main():
     # Part 2
     result = part2(input)
     print(f"Part 2: {result}")
+
+    # Part 2 Optimized
+    result = part2_2(input)
+    print(f"Part 2 (Optimized): {result}")
 
 main()
