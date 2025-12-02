@@ -1,7 +1,7 @@
 use std::fs;
 
 fn part1(ranges: &Vec<&str>) -> i64 {
-    let mut invalid_ids: Vec<i64> = Vec::new();
+    let mut result: i64 = 0;
 
     for range in ranges {
         let range_parts: Vec<&str> = range.split('-').collect();
@@ -14,17 +14,17 @@ fn part1(ranges: &Vec<&str>) -> i64 {
             if val_length % 2 == 0 {
                 let substring = &val_to_check.to_string()[0..val_length/2];
                 if substring.repeat(2) == val_to_check.to_string() {
-                    invalid_ids.push(val_to_check);
+                    result += val_to_check;
                 }
             }
         }
     }
 
-    return invalid_ids.iter().sum();
+    return result;
 }
 
 fn part2(ranges: &Vec<&str>) -> i64 {
-    let mut invalid_ids: Vec<i64> = Vec::new();
+    let mut result: i64 = 0;
 
     for range in ranges {
         let range_parts: Vec<&str> = range.split('-').collect();
@@ -40,7 +40,7 @@ fn part2(ranges: &Vec<&str>) -> i64 {
                     let substring = &val_to_check.to_string()[0..i];
                     let num_repititions = val_length / i;
                     if substring.repeat(num_repititions) == val_to_check.to_string() {
-                        invalid_ids.push(val_to_check);
+                        result += val_to_check;
                         break;
                     }
                 }
@@ -48,9 +48,8 @@ fn part2(ranges: &Vec<&str>) -> i64 {
         }
     }
 
-    return invalid_ids.iter().sum();
+    return result;
 }
-
 
 fn main() {
     let example_input = fs::read_to_string("example.txt")

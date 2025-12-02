@@ -1,5 +1,5 @@
 def part1(input):
-    invalid_ids = []
+    result = 0
     for line in input:
         start_val, end_val = line.split('-')
         start_val = int(start_val)
@@ -11,12 +11,12 @@ def part1(input):
             if val_length % 2 == 0:
                 substring = str(val_to_check)[:val_length//2]
                 if substring * 2 == str(val_to_check):
-                    invalid_ids.append(val_to_check)
+                    result += val_to_check
 
-    return sum(invalid_ids)
+    return result
 
 def part2(input):
-    invalid_ids = []
+    result = 0
     for line in input:
         start_val, end_val = line.split('-')
         start_val = int(start_val)
@@ -30,10 +30,10 @@ def part2(input):
                     substring = str(val_to_check)[:i]
                     num_repititions = val_length // i
                     if substring * num_repititions == str(val_to_check):
-                        invalid_ids.append(val_to_check)
+                        result += val_to_check
                         break
 
-    return sum(invalid_ids)
+    return result
 
 def main():
     example_input = open('/home/john/Documents/Projects/advent_of_code/2025/day2/example.txt', 'r').read().strip().split(',')
