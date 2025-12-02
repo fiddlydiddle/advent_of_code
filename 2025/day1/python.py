@@ -81,7 +81,7 @@ def main():
     example_input = open('/home/john/Documents/Projects/advent_of_code/2025/day1/example.txt', 'r').read().strip().split('\n')
     input = open('/home/john/Documents/Projects/advent_of_code/2025/day1/input.txt', 'r').read().strip().split('\n')
 
-    # # Part 1 Example
+    # Part 1 Example
     result = part1(example_input)
     print(f"Part 1 (example): {result}")
 

@@ -123,8 +123,4 @@ fn main() {
     // Part 2
     let part2_result = part2(&instructions);
     println!("Part 2: {}", part2_result);
-
-    // Part 2 (optimized)
-    let part2_optimized_result = part2_optimized(&instructions);
-    println!("Part 2 (optimized): {}", part2_optimized_result);
 }
