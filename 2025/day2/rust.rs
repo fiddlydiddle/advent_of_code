@@ -54,24 +54,24 @@ fn part2(ranges: &Vec<&str>) -> i64 {
 fn main() {
     let example_input = fs::read_to_string("example.txt")
         .expect("Something went wrong reading the file");
-    let example_ranges: Vec<&str> = example_input.trim().split(',').collect();
+    let example_battery_banks: Vec<&str> = example_input.trim().split(',').collect();
     let input = fs::read_to_string("input.txt")
         .expect("Something went wrong reading the file");
-    let ranges: Vec<&str> = input.trim().split(',').collect();
+    let battery_banks: Vec<&str> = input.trim().split(',').collect();
 
     // Part 1 Example
-    let part1_example_result = part1(&example_ranges);
+    let part1_example_result = part1(&example_battery_banks);
     println!("Part 1 (example): {}", part1_example_result);
 
     // # Part 1
-    let part1_result = part1(&ranges);
+    let part1_result = part1(&battery_banks);
     println!("Part 1: {}", part1_result);
 
     // Part 2 Example
-    let part2_example_result = part2(&example_ranges);
+    let part2_example_result = part2(&example_battery_banks);
     println!("Part 2 (example): {}", part2_example_result);
 
     // Part 2
-    let part2_result = part2(&ranges);
+    let part2_result = part2(&battery_banks);
     println!("Part 2: {}", part2_result);
 }

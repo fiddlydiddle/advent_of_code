@@ -1,3 +1,4 @@
+# Generalized Part 2 to handle Part 1 as well
 def part1(input):
     result = 0
     for battery_bank in input:
@@ -21,11 +22,11 @@ def part1(input):
 
     return result
 
-def part2(input):
+def part2(input, num_digits):
     result = 0
     for battery_bank in input:
         bank_value = 0
-        digits_remaining = 12
+        digits_remaining = num_digits
         significant_digit_index = 0
 
         # Build bank_value one digit at a time
@@ -54,19 +55,19 @@ def main():
     input = open('/home/john/Documents/Projects/advent_of_code/2025/day3/input.txt', 'r').read().strip().split('\n')
 
     # Part 1 Example
-    result = part1(example_input)
+    result = part2(example_input, 2)
     print(f"Part 1 (example): {result}")
 
     # Part 1
-    result = part1(input)
+    result = part2(input, 2)
     print(f"Part 1: {result}")
 
     # Part 2 Example
-    result = part2(example_input)
+    result = part2(example_input, 12)
     print(f"Part 2 (example): {result}")
 
     # Part 2
-    result = part2(input)
+    result = part2(input, 12)
     print(f"Part 2: {result}")
 
 main()
