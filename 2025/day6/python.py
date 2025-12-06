@@ -6,8 +6,7 @@ def part1(input):
     # Parse the input into columns of values
     parsed_input = []
     for line in input:
-        line = line.strip().split(' ')
-        line = list(filter(lambda item: item, line)) # Filter out blank items
+        line = line.strip().split()
         parsed_input.append(line)
 
     # Move through input column-by-column and do the maths
