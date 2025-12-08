@@ -1,3 +1,5 @@
+from functools import reduce
+
 def part1(input):
     result = 0
     current_col_idx = 0
@@ -84,6 +86,63 @@ def part2(input):
 
     return result
 
+################
+# AI Generated  
+################  
+class LogicalTranspose:
+    def __init__(self, lines):
+        self.lines = lines
+        self.nrows = len(lines)
+        self.ncols = max(len(line) for line in lines) if lines else 0
+    
+    def get_row(self, row_idx):
+        """Get a transposed row (which is a column in the original)"""
+        result = ""
+        for col_idx in range(self.nrows):
+            if row_idx < len(self.lines[col_idx]):
+                result += self.lines[col_idx][row_idx]
+            else:
+                result += " "
+        return result
+    
+    def __iter__(self):
+        """Iterate through transposed rows"""
+        for row_idx in range(self.ncols):
+            yield self.get_row(row_idx)
+    
+    def __len__(self):
+        return self.ncols
+
+
+def part2_transpose(input):
+    # Create logical transpose - no mutation of input
+    transposed = LogicalTranspose(input[:-1])
+    
+    operators = input[-1].split()
+    
+    total = 0
+    i_problem = 0
+    operands = []
+    # Iterate through transposed rows plus one empty row at the end
+    for line in list(transposed):
+        if len(line.strip()) == 0:
+            if operands:  # Only process if we have operands
+                operator = operators[i_problem]
+                if operator == "+":
+                    total += sum(operands)
+                else:
+                    total += reduce(lambda curr, new: curr * new, operands, 1)
+                
+                i_problem += 1
+                operands = []
+        else:
+            operands.append(int(line))
+    
+    return total
+
+################
+# /AI Generated  
+################ 
 
 
 def main():

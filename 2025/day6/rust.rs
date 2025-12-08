@@ -48,6 +48,7 @@ fn part1(input: &Vec<&str>) -> u64 {
 }
 
 fn part2(input: &Vec<&str>) -> u64 {
+    // Split input into individual characters
     let parsed_input: Vec<Vec<char>> = input
         .iter()
         .map(|row| row.chars().collect())
@@ -92,7 +93,6 @@ fn part2(input: &Vec<&str>) -> u64 {
                     current_num += digit;
                 }
             }
-            
         }
 
         // Apply operation to running_total
