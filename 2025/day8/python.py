@@ -6,50 +6,40 @@ def part1(input, num_connections):
     distances = []
 
     # Calculate all distances between boxes
-    unique_distances = set([])
-    for idx1, line1 in enumerate(input):
+    # Only keep K closest neighbors for a box
+    unique_distances = set([]) # If we computed the distance between box 1 and 2, don't compute distance between box 2 and 1
+    num_closest_to_keep = 4 # Hard-coded via trial-and-error (sue me)
+    for line1 in input:
         box1 = parse_box(line1)
-        for idx2, line2 in enumerate(input):
-            # Don't compute the distance between a box and itself
-            if idx1 == idx2:
-                continue
-
-            # Check if we've already computed the distance between these two boxes
-            box_tuple = (min(idx1, idx2), max(idx1, idx2))
-            if box_tuple in unique_distances:
-                continue
-            else:
-                unique_distances.add(box_tuple)
-
-            # Compute distance between boxes
+        closest_neighbors = [] 
+        for line2 in input:
             box2 = parse_box(line2)
-            distance = get_distance(box1, box2)
-            distances.append((distance, [(idx1, box1), (idx2, box2)]))
+            if box1 != box2:
+                distance = get_distance(box1, box2)
+                heapq.heappush(closest_neighbors, (distance, [box1, box2]))
 
-    # Order distances
-    heapq.heapify(distances)
-
+        # Only keep track of the distances of the K closest neighbors
+        for _ in range(num_closest_to_keep):
+            distance, (box1, box2) = heapq.heappop(closest_neighbors)
+            box_tuple = (min(box1, box2), max(box1, box2))
+            if box_tuple not in unique_distances:
+                unique_distances.add(box_tuple)
+                heapq.heappush(distances, (distance, (box1, box2)))
+        
     # Build graph of closest specified connections
     box_adjacencies = {}
     connections_made = 0
     part1_result = None
-    while True:
-        distance, [(box1_idx, box1_coordinates), (box2_idx, box2_coordinates)] = heapq.heappop(distances)
+    part2_result = None
+    while len(distances) > 0:
+        distance, [box1_coordinates, box2_coordinates] = heapq.heappop(distances)
 
-        # Update box1 adjacency
-        if box1_idx not in box_adjacencies:
-            box_adjacencies[box1_idx] = set([box2_idx])
-        else:
-            box_adjacencies[box1_idx].add(box2_idx)
-
-        # Update box2 adjacency
-        if box2_idx not in box_adjacencies:
-            box_adjacencies[box2_idx] = set([box1_idx])
-        else:
-            box_adjacencies[box2_idx].add(box1_idx)
+        # Connect the two boxes by updating their adjacency (even if they're already in the same circuit)
+        box_adjacencies.setdefault(box1_coordinates, set()).add(box2_coordinates)
+        box_adjacencies.setdefault(box2_coordinates, set()).add(box1_coordinates)
 
         # Part 2: Traverse box1's circuit and see if its size is the whole input
-        subgraph_size, _ = traverse_circuit(box1_idx, box_adjacencies, set())
+        subgraph_size, _ = traverse_circuit(box1_coordinates, box_adjacencies, set())
         if subgraph_size == len(input):
             part2_result = box1_coordinates[0] * box2_coordinates[0]
             return part1_result, part2_result
@@ -57,7 +47,7 @@ def part1(input, num_connections):
         # Part 1: Traverse circuits made so far and get their size
         if connections_made == num_connections - 1:
             seen_nodes = set()
-            biggest_circuits = []
+            biggest_circuits = [] # This will be a max heap
             for box in box_adjacencies.keys():
                 if box not in seen_nodes:
                     subgraph_size, seen_nodes = traverse_circuit(box, box_adjacencies, seen_nodes)
@@ -69,6 +59,7 @@ def part1(input, num_connections):
         
         connections_made += 1
 
+    return part1_result, part2_result
 
 def parse_box(input_line):
     box_x, box_y, box_z = input_line.split(',')
