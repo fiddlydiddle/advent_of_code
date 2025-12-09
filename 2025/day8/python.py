@@ -55,7 +55,7 @@ def part1(input, num_connections):
 
 
             # Multiply size of three biggest subgraphs
-            part1_result = biggest_circuits[0] * biggest_circuits [1] * biggest_circuits[2] * -1 # Values are negative due to max heap
+            part1_result = biggest_circuits[0] * biggest_circuits[1] * biggest_circuits[2] * -1 # Values are negative due to max heap
         
         connections_made += 1
 
@@ -69,7 +69,7 @@ def get_distance(box1, box2):
     x_distance = (box2[0] - box1[0]) ** 2
     y_distance = (box2[1] - box1[1]) ** 2
     z_distance = (box2[2] - box1[2]) ** 2
-    return round(sqrt(x_distance + y_distance + z_distance), 3)
+    return x_distance + y_distance + z_distance
 
 
 def traverse_circuit(node, adjacency_map, seen_nodes):

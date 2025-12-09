@@ -1,12 +1,12 @@
 use std::fs;
-use std::collections::HashMap;
-use std::collections::BinaryHeap;
-use std::collections::HashSet;
+use std::collections::{HashMap, BinaryHeap, HashSet, VecDeque};
 use std::cmp;
 use std::cmp::Reverse;
-use std::collections::VecDeque;
+use ahash::{HashSetExt, HashMapExt, RandomState};
 
 type Triple = (usize, usize, usize);
+type FastHashMap<K, V> = HashMap<K, V, RandomState>;
+type FastHashSet<T> = HashSet<T, RandomState>;
 
 struct SimulationResult {
     part1_result: usize,
@@ -22,7 +22,7 @@ struct BoxDistance {
 
 fn part1(input: &Vec<&str>, num_connections: usize) -> SimulationResult {
     let mut distances: BinaryHeap<BoxDistance> = BinaryHeap::new();
-    let mut unique_distances: HashSet<(Triple, Triple)> = HashSet::new();
+    let mut unique_distances: FastHashSet<(Triple, Triple)> = FastHashSet::new();
     const NUM_CLOSEST_TO_KEEP: usize = 6;
 
     // Compute distance between boxes. Only keep top K neighbors for each box
@@ -58,23 +58,23 @@ fn part1(input: &Vec<&str>, num_connections: usize) -> SimulationResult {
     }
 
     // Build a graph of box connections as we make them
-    let mut box_adjacencies: HashMap<Triple, HashSet<Triple>> = HashMap::new();
+    let mut box_adjacencies: FastHashMap<Triple, FastHashSet<Triple>> = FastHashMap::new();
     let mut connections_made: usize = 0;
     let mut part1_result: usize = 0;
     let mut part2_result: usize = 0;
 
-    let mut part2_seen_boxes: HashSet<Triple> = HashSet::new();
+    let mut part2_seen_boxes: FastHashSet<Triple> = FastHashSet::new();
     while distances.len() > 0 {
         let box_distance: BoxDistance = distances.pop().expect("No more distances!");
 
         // Connect box 1 and box 2
         box_adjacencies
             .entry(box_distance.box1_coordinates)
-            .or_insert(HashSet::new())
+            .or_insert(FastHashSet::new())
             .insert(box_distance.box2_coordinates);
         box_adjacencies
             .entry(box_distance.box2_coordinates)
-            .or_insert(HashSet::new())
+            .or_insert(FastHashSet::new())
             .insert(box_distance.box1_coordinates);
 
         // Part 2, traverse box1's circuit and see if its size is the whole input
@@ -90,7 +90,7 @@ fn part1(input: &Vec<&str>, num_connections: usize) -> SimulationResult {
 
         // Part 1, traverse circuits and get their size
         if connections_made == num_connections - 1 {
-            let mut seen_boxes: HashSet<Triple> = HashSet::new();
+            let mut seen_boxes: FastHashSet<Triple> = FastHashSet::new();
             let mut biggest_circuits: BinaryHeap<usize> = BinaryHeap::new();
             for box_coordinates in box_adjacencies.keys() {
                 if !seen_boxes.contains(box_coordinates) {
@@ -114,7 +114,7 @@ fn part1(input: &Vec<&str>, num_connections: usize) -> SimulationResult {
     };
 }
 
-fn traverse_circuit(box_coordinates: &Triple, box_adjacencies: &HashMap<Triple, HashSet<Triple>>, seen_boxes: &mut HashSet<Triple>) -> usize {
+fn traverse_circuit(box_coordinates: &Triple, box_adjacencies: &FastHashMap<Triple, FastHashSet<Triple>>, seen_boxes: &mut FastHashSet<Triple>) -> usize {
     let mut queue: VecDeque<Triple> = VecDeque::from([*box_coordinates]);
     let mut circuit_size: usize = 0;
 
@@ -136,12 +136,16 @@ fn traverse_circuit(box_coordinates: &Triple, box_adjacencies: &HashMap<Triple, 
 }
 
 fn parse_box(line: &str) -> Triple {
-    let coordinates: Vec<usize> = line
+    let mut parts = line
         .split(',')
-        .map(|val| val.parse().expect("Value is not numeric"))
-        .collect();
+        .map(|val| val.parse().expect("Value is not numeric"));
+    
+    // ⚡ FIX: Direct iterator consumption—NO HEAP ALLOCATION
+    let x = parts.next().unwrap_or(0);
+    let y = parts.next().unwrap_or(0);
+    let z = parts.next().unwrap_or(0);
 
-    return (coordinates[0], coordinates[1], coordinates[2])
+    (x, y, z)
 }
 
 fn get_distance(box1_coordinates: Triple, box2_coordinates: Triple) -> usize {
